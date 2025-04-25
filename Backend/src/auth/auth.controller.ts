@@ -9,7 +9,6 @@ interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
-  dateOfBirth: string;
   gender: string;
   phone?: string;
   address?: string;
@@ -37,18 +36,44 @@ interface UpdateProfileRequest {
   specialization?: string;
 }
 
+interface ErrorResponse {
+  error: string;
+  details?: string;
+}
+
 export const authController = {
   async register(c: Context) {
     try {
       const userData: RegisterRequest = await c.req.json();
       
-      // Convert date string to Date object
-      userData.dateOfBirth = new Date(userData.dateOfBirth);
+      // Validate required fields
+      if (!userData.firstName) {
+        throw new Error('First name is required');
+      }
+      if (!userData.lastName) {
+        throw new Error('Last name is required');
+      }
+      if (!userData.email) {
+        throw new Error('Email is required');
+      }
+      if (!userData.password) {
+        throw new Error('Password is required');
+      }
+      if (!userData.gender) {
+        throw new Error('Gender is required');
+      }
       
-      const result = await authService.registerUser(userData);
+      const result = await authService.registerUser({
+        ...userData
+      });
+      
       return c.json({ message: result.message, userId: result.userId }, 201);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Registration failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
@@ -57,36 +82,53 @@ export const authController = {
       const { email, password }: LoginRequest = await c.req.json();
       
       if (!email || !password) {
-        return c.json({ error: "Email and password are required" }, 400);
+        throw new Error('Email and password are required');
       }
 
       const result = await authService.loginUser({ email, password });
       return c.json(result, 200);
     } catch (error: any) {
-      if (error.message === "User not found") {
-        return c.json({ error: "Invalid credentials" }, 401);
-      }
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message === "User not found" ? "Invalid credentials" : error.message,
+        details: error.details
+      };
+      return c.json(errorResponse, error.message === "User not found" ? 401 : 400);
     }
   },
 
   async verifyAccount(c: Context) {
     try {
       const { token } = c.req.query();
+      if (!token) {
+        throw new Error('Verification token is required');
+      }
+      
       const result = await authService.verifyUser(token);
       return c.json({ message: result.message }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Verification failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
   async requestPasswordReset(c: Context) {
     try {
       const { email } = await c.req.json();
+      if (!email) {
+        throw new Error('Email is required');
+      }
+      
       const result = await authService.requestPasswordReset(email);
       return c.json({ message: result.message }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Password reset request failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
@@ -95,32 +137,55 @@ export const authController = {
       const { token } = c.req.query();
       const { newPassword } = await c.req.json();
       
+      if (!token || !newPassword) {
+        throw new Error('Token and new password are required');
+      }
+      
       const result = await authService.resetPassword(token, newPassword);
       return c.json({ message: result.message }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Password reset failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
   async getUserProfile(c: Context) {
     try {
       const userId = c.req.param('userId');
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+      
       const user = await authService.getUserProfile(userId);
       return c.json(user, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Failed to get user profile',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
   async updateProfile(c: Context) {
     try {
       const userId = c.req.param('userId');
-      const updateData: UpdateProfileRequest = await c.req.json();
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
       
+      const updateData: UpdateProfileRequest = await c.req.json();
       const result = await authService.updateUserProfile(userId, updateData);
       return c.json({ message: result.message }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Profile update failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
@@ -129,10 +194,18 @@ export const authController = {
       const userId = c.req.param('userId');
       const { currentPassword, newPassword } = await c.req.json();
       
+      if (!userId || !currentPassword || !newPassword) {
+        throw new Error('User ID, current password, and new password are required');
+      }
+      
       const result = await authService.changePassword(userId, currentPassword, newPassword);
       return c.json({ message: result.message }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Password change failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
@@ -141,30 +214,45 @@ export const authController = {
       const userId = c.req.param('userId');
       const { licenseNumber, specialization } = await c.req.json();
       
+      if (!userId || !licenseNumber || !specialization) {
+        throw new Error('User ID, license number, and specialization are required');
+      }
+      
       const result = await authService.upgradeToDoctor(userId, licenseNumber, specialization);
       return c.json({ message: result.message }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Upgrade to doctor failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
   async searchUsers(c: Context) {
     try {
-      const query = c.req.query('query');
+      const query = c.req.query('query') || '';
       const role = c.req.query('role');
       
       const results = await authService.searchUsers(query, role);
       return c.json(results, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'User search failed',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
   async sendVerificationEmail(c: Context) {
     try {
       const { email } = await c.req.json();
+      if (!email) {
+        throw new Error('Email is required');
+      }
+      
       const user = await authService.getUserProfile(email);
-
       if (!user) {
         throw new Error('User not found');
       }
@@ -197,7 +285,11 @@ export const authController = {
         response
       }, 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Failed to send verification email',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   },
 
@@ -207,7 +299,11 @@ export const authController = {
       const users = await authService.searchUsers('', '');
       return c.json(users.slice(0, limit), 200);
     } catch (error: any) {
-      return c.json({ error: error.message }, 400);
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Failed to get users',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
     }
   }
 };

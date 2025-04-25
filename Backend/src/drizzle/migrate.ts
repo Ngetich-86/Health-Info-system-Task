@@ -1,41 +1,41 @@
-import { sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Client } from "pg";
-import dotenv from "dotenv";
+import {migrate} from 'drizzle-orm/neon-http/migrator';
+import db from './db';
+import { sql } from 'drizzle-orm';
 
-dotenv.config();
-
-const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-});
-
-const db = drizzle(client);
-
-async function migration() {
-    console.log('======== Migrations started ========');
-
+async function migration(){
     try {
-        await client.connect();
-        console.log('======== Migrations completed successfully ========');
-    } catch (err: unknown) {
-        if (err instanceof Error) {
-            console.error('Migration error:', err.message);
-        } else {
-            console.error('Migration error:', err);
-        }
+       console.log("==Migration Started==");
+       
+       // Drop all existing tables and types
+       await db.execute(sql`
+         DO $$ 
+         BEGIN
+           -- Drop tables if they exist
+           DROP TABLE IF EXISTS enrollment CASCADE;
+           DROP TABLE IF EXISTS health_program CASCADE;
+           DROP TABLE IF EXISTS doctor CASCADE;
+           DROP TABLE IF EXISTS client CASCADE;
+           DROP TABLE IF EXISTS "user" CASCADE;
+           
+           -- Drop enum type if it exists
+           IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+             DROP TYPE user_role CASCADE;
+           END IF;
+         END $$;
+       `);
+
+       await migrate(db,{
+        migrationsFolder: __dirname + '/migrations',
+       }) ;
+       console.log("==Migration Finished==");
+       process.exit(0);
+    } catch (error) {
+        console.error("Migration failed with error: ", error);
         process.exit(1);
-    } finally {
-        await client.end();
     }
 }
 
-// Execute migrations
-migration().catch((err: unknown) => {
-    if (err instanceof Error) {
-        console.error('Migration error:', err.message);
-    } else {
-        console.error('Migration error:', err);
-    }
+migration().catch((e) => {
+    console.error("Unexpected error during migration:", e);
     process.exit(1);
-});
+  });

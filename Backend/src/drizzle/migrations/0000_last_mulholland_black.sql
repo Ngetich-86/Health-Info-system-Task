@@ -4,7 +4,6 @@ CREATE TABLE "client" (
 	"user_id" varchar(50) NOT NULL,
 	"first_name" varchar(100) NOT NULL,
 	"last_name" varchar(100) NOT NULL,
-	"date_of_birth" date NOT NULL,
 	"gender" varchar(10) NOT NULL,
 	"phone" varchar(20),
 	"address" text
@@ -19,7 +18,6 @@ CREATE TABLE "doctor" (
 );
 --> statement-breakpoint
 CREATE TABLE "enrollment" (
-	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" varchar(50) NOT NULL,
 	"program_id" varchar(50) NOT NULL,
 	"enrolled_at" timestamp DEFAULT now() NOT NULL,
@@ -47,6 +45,11 @@ CREATE TABLE "user" (
 	"image_url" varchar(255),
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
+	"is_verified" boolean DEFAULT false NOT NULL,
+	"verification_token" varchar(255),
+	"verification_token_expires_at" timestamp,
+	"password_reset_token" varchar(255),
+	"password_reset_expires_at" timestamp,
 	CONSTRAINT "user_user_id_unique" UNIQUE("user_id"),
 	CONSTRAINT "user_email_unique" UNIQUE("email")
 );

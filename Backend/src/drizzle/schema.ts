@@ -13,6 +13,11 @@ export const User = pgTable('user', {
   imageUrl: varchar('image_url', { length: 255 }), // New field for profile pictures
   createdAt: timestamp('created_at').defaultNow().notNull(),
   isActive: boolean('is_active').default(true).notNull(),
+  isVerified: boolean('is_verified').default(false).notNull(),
+  verificationToken: varchar('verification_token', { length: 255 }),
+  verificationTokenExpiresAt: timestamp('verification_token_expires_at'),
+  passwordResetToken: varchar('password_reset_token', { length: 255 }),
+  passwordResetExpiresAt: timestamp('password_reset_expires_at'),
 }, (table) => ({
   emailIdx: index('email_idx').on(table.email),
   roleIdx: index('role_idx').on(table.role),
@@ -25,7 +30,6 @@ export const Client = pgTable('client', {
     .references(() => User.userId, { onDelete: 'cascade' }),
   firstName: varchar('first_name', { length: 100 }).notNull(),
   lastName: varchar('last_name', { length: 100 }).notNull(),
-  dateOfBirth: date('date_of_birth').notNull(),
   gender: varchar('gender', { length: 10 }).notNull(),
   phone: varchar('phone', { length: 20 }),
   address: text('address'),
@@ -51,7 +55,6 @@ export const HealthProgram = pgTable('health_program', {
 });
 
 export const Enrollment = pgTable('enrollment', {
-  id: serial('id').primaryKey(),
   userId: varchar('user_id', { length: 50 }).notNull()
     .references(() => User.userId, { onDelete: 'cascade' }), // Now references User, not Client
   programId: varchar('program_id', { length: 50 }).notNull()

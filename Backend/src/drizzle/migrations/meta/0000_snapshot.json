@@ -1,5 +1,5 @@
 {
-  "id": "411f5876-33a0-46bd-8e09-2eb2bc0cf248",
+  "id": "d0874318-55ff-49f0-a157-4d2bac82d134",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -29,12 +29,6 @@
         "last_name": {
           "name": "last_name",
           "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "date_of_birth": {
-          "name": "date_of_birth",
-          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
@@ -142,12 +136,6 @@
       "name": "enrollment",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "user_id": {
           "name": "user_id",
           "type": "varchar(50)",
@@ -353,6 +341,37 @@
           "primaryKey": false,
           "notNull": true,
           "default": true
+        },
+        "is_verified": {
+          "name": "is_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "verification_token": {
+          "name": "verification_token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_token_expires_at": {
+          "name": "verification_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password_reset_token": {
+          "name": "password_reset_token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password_reset_expires_at": {
+          "name": "password_reset_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {

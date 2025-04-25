@@ -22,12 +22,13 @@ app.route("/", authRouter);
 
 // Default route
 app.get("/", async (c) => {
-  try {
-    let html = await readFile("./index.html", "utf-8");
-    return c.html(html);
-  } catch (err: any) {
-    return c.text(err.message, 500);
-  }
+  // try {
+  //   let html = await readFile("./index.html", "utf-8");
+  //   return c.html(html);
+  // } catch (err: any) {
+  //   return c.text(err.message, 500);
+  // }
+  return c.json({ message: '🌟 Welcome to health info API! 🚀' });
 });
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
