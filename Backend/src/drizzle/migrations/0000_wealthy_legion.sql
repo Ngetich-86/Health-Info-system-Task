@@ -1,0 +1,60 @@
+CREATE TYPE "public"."user_role" AS ENUM('client', 'doctor', 'admin');--> statement-breakpoint
+CREATE TABLE "client" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" varchar(50) NOT NULL,
+	"first_name" varchar(100) NOT NULL,
+	"last_name" varchar(100) NOT NULL,
+	"date_of_birth" date NOT NULL,
+	"gender" varchar(10) NOT NULL,
+	"phone" varchar(20),
+	"address" text
+);
+--> statement-breakpoint
+CREATE TABLE "doctor" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" varchar(50) NOT NULL,
+	"license_number" varchar(50),
+	"specialization" varchar(100),
+	CONSTRAINT "doctor_license_number_unique" UNIQUE("license_number")
+);
+--> statement-breakpoint
+CREATE TABLE "enrollment" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" varchar(50) NOT NULL,
+	"program_id" varchar(50) NOT NULL,
+	"enrolled_at" timestamp DEFAULT now() NOT NULL,
+	"status" varchar(20) NOT NULL,
+	"notes" text,
+	CONSTRAINT "enrollment_user_id_program_id_pk" PRIMARY KEY("user_id","program_id")
+);
+--> statement-breakpoint
+CREATE TABLE "health_program" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"program_id" varchar(50) NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"description" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	CONSTRAINT "health_program_program_id_unique" UNIQUE("program_id")
+);
+--> statement-breakpoint
+CREATE TABLE "user" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user_id" varchar(50) NOT NULL,
+	"email" varchar(100) NOT NULL,
+	"password_hash" varchar(255) NOT NULL,
+	"role" "user_role" DEFAULT 'client' NOT NULL,
+	"image_url" varchar(255),
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	CONSTRAINT "user_user_id_unique" UNIQUE("user_id"),
+	CONSTRAINT "user_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+ALTER TABLE "client" ADD CONSTRAINT "client_user_id_user_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "doctor" ADD CONSTRAINT "doctor_user_id_user_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "enrollment" ADD CONSTRAINT "enrollment_user_id_user_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "enrollment" ADD CONSTRAINT "enrollment_program_id_health_program_program_id_fk" FOREIGN KEY ("program_id") REFERENCES "public"."health_program"("program_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "enrollment_user_idx" ON "enrollment" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "email_idx" ON "user" USING btree ("email");--> statement-breakpoint
+CREATE INDEX "role_idx" ON "user" USING btree ("role");
