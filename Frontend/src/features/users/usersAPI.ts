@@ -20,9 +20,9 @@ export const usersAPI = createApi({
     tagTypes: ['Users'],
     endpoints: (builder) => ({
         // Auth endpoints
-        register: builder.mutation<ApiResponse<{ userId: string }>, RegisterInput>({
+        register: builder.mutation<ApiResponse<{ userId: string }>, Omit<RegisterInput, 'confirmPassword'>>({
             query: (userData) => ({
-                url: 'register',
+                url: 'users/register',
                 method: 'POST',
                 body: userData,
             }),

@@ -4,6 +4,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import userReducer from '../features/users/userSlice';
 import { usersAPI } from '../features/users/usersAPI';
+import { programAPI } from '../features/healthPrograms/programAPI';
 
 const persistConfig = {
   key: 'root',
@@ -16,12 +17,13 @@ const persistedReducer = persistReducer(persistConfig, userReducer);
 export const store = configureStore({
   reducer: {
     user: persistedReducer,
-    [usersAPI.reducerPath]: usersAPI.reducer
+    [usersAPI.reducerPath]: usersAPI.reducer,
+    [programAPI.reducerPath]: programAPI.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(usersAPI.middleware)
+    }).concat(usersAPI.middleware, programAPI.middleware)
 });
 
 export const persistor = persistStore(store);

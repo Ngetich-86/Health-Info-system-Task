@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetAllUsersQuery, useSearchUsersQuery } from '../features/users/usersAPI';
-import { CompleteUser } from '../types/types';
+import { CompleteUser, UserRole } from '../types/types';
 import { FaSearch, FaUserPlus, FaEye, FaEdit, FaTrash, FaClipboardList } from 'react-icons/fa';
 
 const Client = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedRole, setSelectedRole] = useState<'patient' | 'doctor' | 'admin' | ''>('');
+    const [selectedRole, setSelectedRole] = useState<UserRole | ''>('');
     const [selectedClient, setSelectedClient] = useState<CompleteUser | null>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
     const { data: clients, isLoading: isLoadingClients } = useGetAllUsersQuery();
     const { data: searchResults, isLoading: isLoadingSearch } = useSearchUsersQuery(
-        { query: searchQuery, role: selectedRole },
+        { query: searchQuery, role: selectedRole as UserRole },
         { skip: !searchQuery && !selectedRole }
     );
 
@@ -29,7 +29,7 @@ const Client = () => {
         setSelectedClient(null);
     };
 
-    return (
+  return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
@@ -61,7 +61,7 @@ const Client = () => {
                         </div>
                         <select
                             value={selectedRole}
-                            onChange={(e) => setSelectedRole(e.target.value as 'patient' | 'doctor' | 'admin' | '')}
+                            onChange={(e) => setSelectedRole(e.target.value as UserRole | '')}
                             className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md"
                         >
                             <option value="">All Roles</option>
