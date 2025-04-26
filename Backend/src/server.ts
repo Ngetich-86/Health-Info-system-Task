@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { readFile } from "fs/promises";
 import assert from "assert";
 import { authRouter } from "./auth/auth.router";
+import programRouter from "./healthProgram/program.router";
 
 
 
@@ -19,6 +20,7 @@ app.use(cors({
 
 // Register all routes
 app.route("/", authRouter);
+app.route("/", programRouter);
 
 // Default route
 app.get("/", async (c) => {

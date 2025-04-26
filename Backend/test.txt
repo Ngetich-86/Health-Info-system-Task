@@ -5,3 +5,8 @@
   "password": "yourpassword",
   "gender": "male"
 }
+
+   {
+     "name": "TB Program",
+     "description": "Tuberculosis prevention and treatment program"
+   }
