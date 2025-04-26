@@ -5,11 +5,17 @@ import { programService } from "./program.service";
 interface CreateProgramRequest {
   name: string;
   description?: string;
+  imageUrl?: string;
+  duration?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
 interface UpdateProgramRequest {
   name?: string;
   description?: string;
+  imageUrl?: string;
+  duration?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
   isActive?: boolean;
 }
 
@@ -26,6 +32,11 @@ export const programController = {
       // Validate required fields
       if (!programData.name) {
         throw new Error('Program name is required');
+      }
+
+      // Validate difficulty if provided
+      if (programData.difficulty && !['Beginner', 'Intermediate', 'Advanced'].includes(programData.difficulty)) {
+        throw new Error('Invalid difficulty level');
       }
 
       const newProgram = await programService.createProgram(programData);
@@ -70,6 +81,37 @@ export const programController = {
     }
   },
 
+  async getProgramsByDifficulty(c: Context) {
+    try {
+      const difficulty = c.req.param('difficulty');
+      if (!difficulty) {
+        throw new Error('Difficulty level is required');
+      }
+
+      const programs = await programService.getProgramsByDifficulty(difficulty);
+      return c.json(programs, 200);
+    } catch (error: any) {
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Failed to get programs by difficulty',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
+    }
+  },
+
+  async getActivePrograms(c: Context) {
+    try {
+      const programs = await programService.getActivePrograms();
+      return c.json(programs, 200);
+    } catch (error: any) {
+      const errorResponse: ErrorResponse = {
+        error: error.message || 'Failed to get active programs',
+        details: error.details
+      };
+      return c.json(errorResponse, 400);
+    }
+  },
+
   async updateProgram(c: Context) {
     try {
       const programId = c.req.param('programId');
@@ -78,6 +120,12 @@ export const programController = {
       }
 
       const updateData: UpdateProgramRequest = await c.req.json();
+      
+      // Validate difficulty if provided
+      if (updateData.difficulty && !['Beginner', 'Intermediate', 'Advanced'].includes(updateData.difficulty)) {
+        throw new Error('Invalid difficulty level');
+      }
+
       const updatedProgram = await programService.updateProgram(programId, updateData);
       return c.json(updatedProgram, 200);
     } catch (error: any) {

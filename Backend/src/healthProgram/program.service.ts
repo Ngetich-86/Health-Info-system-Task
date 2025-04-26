@@ -6,11 +6,17 @@ import { HealthProgram } from "../drizzle/schema";
 interface CreateProgramInput {
   name: string;
   description?: string;
+  imageUrl?: string;
+  duration?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
 interface UpdateProgramInput {
   name?: string;
   description?: string;
+  imageUrl?: string;
+  duration?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
   isActive?: boolean;
 }
 
@@ -25,6 +31,9 @@ export const programService = {
         programId,
         name: programData.name,
         description: programData.description,
+        imageUrl: programData.imageUrl,
+        duration: programData.duration,
+        difficulty: programData.difficulty,
         isActive: true,
       })
       .returning()
@@ -62,6 +71,9 @@ export const programService = {
       .set({
         name: updateData.name,
         description: updateData.description,
+        imageUrl: updateData.imageUrl,
+        duration: updateData.duration,
+        difficulty: updateData.difficulty,
         isActive: updateData.isActive,
       })
       .where(eq(HealthProgram.programId, programId))
@@ -110,5 +122,25 @@ export const programService = {
       .execute();
 
     return updatedProgram;
+  },
+
+  async getProgramsByDifficulty(difficulty: string) {
+    const programs = await db
+      .select()
+      .from(HealthProgram)
+      .where(eq(HealthProgram.difficulty, difficulty))
+      .execute();
+
+    return programs;
+  },
+
+  async getActivePrograms() {
+    const programs = await db
+      .select()
+      .from(HealthProgram)
+      .where(eq(HealthProgram.isActive, true))
+      .execute();
+
+    return programs;
   }
 };

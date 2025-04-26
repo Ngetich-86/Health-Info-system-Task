@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, date, boolean, timestamp, index, primaryKey, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, text, date, boolean, timestamp, index, primaryKey, pgEnum, integer } from 'drizzle-orm/pg-core';
 
 // 1. Define User Roles as a PostgreSQL ENUM
 export const userRoleEnum = pgEnum('user_role', ['client', 'doctor', 'admin']);
@@ -44,25 +44,35 @@ export const Doctor = pgTable('doctor', {
   specialization: varchar('specialization', { length: 100 }),
 });
 
-// 5. HealthProgram and Enrollment (Same as before, but now linked to Client.userId)
+// 5. HealthProgram with image URL
 export const HealthProgram = pgTable('health_program', {
   id: serial('id').primaryKey(),
   programId: varchar('program_id', { length: 50 }).unique().notNull(),
   name: varchar('name', { length: 100 }).notNull(),
   description: text('description'),
+  imageUrl: varchar('image_url', { length: 255 }), // Added image URL
+  duration: varchar('duration', { length: 50 }), // e.g., "3 months", "6 weeks"
+  difficulty: varchar('difficulty', { length: 20 }), // e.g., "Beginner", "Intermediate", "Advanced"
   createdAt: timestamp('created_at').defaultNow().notNull(),
   isActive: boolean('is_active').default(true).notNull(),
-});
+}, (table) => ({
+  nameIdx: index('program_name_idx').on(table.name),
+}));
 
+// 6. Enhanced Enrollment table
 export const Enrollment = pgTable('enrollment', {
+  id: serial('id').primaryKey(),
   userId: varchar('user_id', { length: 50 }).notNull()
-    .references(() => User.userId, { onDelete: 'cascade' }), // Now references User, not Client
+    .references(() => User.userId, { onDelete: 'cascade' }),
   programId: varchar('program_id', { length: 50 }).notNull()
     .references(() => HealthProgram.programId, { onDelete: 'cascade' }),
   enrolledAt: timestamp('enrolled_at').defaultNow().notNull(),
-  status: varchar('status', { length: 20 }).notNull(),
+  completedAt: timestamp('completed_at'),
+  status: varchar('status', { length: 20 }).notNull().default('active'), // active, completed, paused, cancelled
+  progress: integer('progress').default(0), // 0-100 percentage
   notes: text('notes'),
+  lastAccessedAt: timestamp('last_accessed_at').defaultNow(),
 }, (table) => ({
-  enrollmentPk: primaryKey(table.userId, table.programId),
-  userIdx: index('enrollment_user_idx').on(table.userId),
+  userProgramIdx: index('user_program_idx').on(table.userId, table.programId),
+  statusIdx: index('enrollment_status_idx').on(table.status),
 }));

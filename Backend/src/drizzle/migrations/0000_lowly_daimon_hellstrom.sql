@@ -18,12 +18,15 @@ CREATE TABLE "doctor" (
 );
 --> statement-breakpoint
 CREATE TABLE "enrollment" (
+	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" varchar(50) NOT NULL,
 	"program_id" varchar(50) NOT NULL,
 	"enrolled_at" timestamp DEFAULT now() NOT NULL,
-	"status" varchar(20) NOT NULL,
+	"completed_at" timestamp,
+	"status" varchar(20) DEFAULT 'active' NOT NULL,
+	"progress" integer DEFAULT 0,
 	"notes" text,
-	CONSTRAINT "enrollment_user_id_program_id_pk" PRIMARY KEY("user_id","program_id")
+	"last_accessed_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE "health_program" (
@@ -31,6 +34,9 @@ CREATE TABLE "health_program" (
 	"program_id" varchar(50) NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"description" text,
+	"image_url" varchar(255),
+	"duration" varchar(50),
+	"difficulty" varchar(20),
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
 	CONSTRAINT "health_program_program_id_unique" UNIQUE("program_id")
@@ -58,6 +64,8 @@ ALTER TABLE "client" ADD CONSTRAINT "client_user_id_user_user_id_fk" FOREIGN KEY
 ALTER TABLE "doctor" ADD CONSTRAINT "doctor_user_id_user_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "enrollment" ADD CONSTRAINT "enrollment_user_id_user_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "enrollment" ADD CONSTRAINT "enrollment_program_id_health_program_program_id_fk" FOREIGN KEY ("program_id") REFERENCES "public"."health_program"("program_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "enrollment_user_idx" ON "enrollment" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "user_program_idx" ON "enrollment" USING btree ("user_id","program_id");--> statement-breakpoint
+CREATE INDEX "enrollment_status_idx" ON "enrollment" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "program_name_idx" ON "health_program" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "email_idx" ON "user" USING btree ("email");--> statement-breakpoint
 CREATE INDEX "role_idx" ON "user" USING btree ("role");
