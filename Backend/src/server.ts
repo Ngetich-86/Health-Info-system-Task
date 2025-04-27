@@ -6,6 +6,7 @@ import { readFile } from "fs/promises";
 import assert from "assert";
 import { authRouter } from "./auth/auth.router";
 import programRouter from "./healthProgram/program.router";
+import enrollmentRouter from "./enrollment/enroll.router";
 
 
 
@@ -21,6 +22,7 @@ app.use(cors({
 // Register all routes
 app.route("/", authRouter);
 app.route("/", programRouter);
+app.route("/", enrollmentRouter);
 
 // Default route
 app.get("/", async (c) => {

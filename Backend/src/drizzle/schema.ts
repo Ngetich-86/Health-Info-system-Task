@@ -76,3 +76,12 @@ export const Enrollment = pgTable('enrollment', {
   userProgramIdx: index('user_program_idx').on(table.userId, table.programId),
   statusIdx: index('enrollment_status_idx').on(table.status),
 }));
+
+export const schema = {
+  User,
+  Client,
+  Doctor,
+  HealthProgram,
+  Enrollment,
+  userRoleEnum
+};
