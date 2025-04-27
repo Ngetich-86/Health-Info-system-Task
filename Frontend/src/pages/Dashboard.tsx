@@ -1,13 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../app/store';
-import { UserState } from '../types/types';
+import { RootState } from '../store';
 import { 
   useGetAllProgramsQuery,
-  useGetUserEnrollmentsQuery,
-  HealthProgram,
-  ProgramEnrollment
+  HealthProgram
 } from '../features/healthPrograms/programAPI';
+import { useGetAllEnrollmentsQuery } from '../features/enrollment/enrollmentAPI';
+import { Enrollment } from '../types/types';
 import {
   BarChart,
   Bar,
@@ -24,42 +23,56 @@ import { FaUsers, FaClipboardList, FaChartLine, FaTrophy } from 'react-icons/fa'
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+interface ProgramStat {
+  name: string;
+  value: number;
+}
+
+interface EnrollmentData {
+  name: string;
+  enrollments: number;
+}
+
 const Dashboard: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.user as UserState);
-  const { data: programs, isLoading: programsLoading } = useGetAllProgramsQuery();
-  const { data: enrollments, isLoading: enrollmentsLoading } = useGetUserEnrollmentsQuery();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const { data: programs = [], isLoading: programsLoading } = useGetAllProgramsQuery();
+  const { data: enrollments = [], isLoading: enrollmentsLoading, refetch: refetchEnrollments } = useGetAllEnrollmentsQuery();
+  console.log('Enrollments:', enrollments);
+console.log('Programs:', programs);
 
   // Calculate program statistics
-  const programStats = programs?.reduce((acc, program) => {
+  const programStats = programs.reduce((acc: Record<string, number>, program: HealthProgram) => {
     const difficulty = program.difficulty || 'Unknown';
     acc[difficulty] = (acc[difficulty] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>) || {};
+  }, {});
 
-  const programData = Object.entries(programStats).map(([name, value]) => ({
+  const programData: ProgramStat[] = Object.entries(programStats).map(([name, value]) => ({
     name,
     value
   }));
 
   // Calculate completion rate
-  const completionRate = enrollments?.reduce((acc, enrollment) => {
-    if (enrollment.isCompleted) acc.completed++;
+  const completionRate = enrollments.reduce((acc: { completed: number; total: number }, enrollment: Enrollment) => {
+    if (enrollment.status === 'completed') acc.completed++;
     acc.total++;
     return acc;
-  }, { completed: 0, total: 0 }) || { completed: 0, total: 0 };
+  }, { completed: 0, total: 0 });
 
   const completionPercentage = completionRate.total > 0 
     ? Math.round((completionRate.completed / completionRate.total) * 100) 
     : 0;
 
   // Calculate enrollment data for chart
-  const enrollmentData = programs?.map(program => {
-    const enrollmentCount = enrollments?.filter(e => e.programId === program.programId).length || 0;
+  const enrollmentData: EnrollmentData[] = programs.map((program: HealthProgram) => {
+    const enrollmentCount = enrollments.filter((e: Enrollment) => e.programId === program.programId).length;
+    // console.log('Enrollment Count:', enrollmentCount);
     return {
       name: program.name,
       enrollments: enrollmentCount
     };
-  }) || [];
+  });
+  // console.log("Enrollment Data:", enrollmentData);
 
   if (programsLoading || enrollmentsLoading) {
     return (
@@ -82,7 +95,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Programs</p>
-              <p className="text-2xl font-semibold text-gray-800">{programs?.length || 0}</p>
+              <p className="text-2xl font-semibold text-gray-800">{programs.length}</p>
             </div>
           </div>
         </div>
@@ -93,8 +106,8 @@ const Dashboard: React.FC = () => {
               <FaClipboardList className="h-6 w-6" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">My Enrollments</p>
-              <p className="text-2xl font-semibold text-gray-800">{enrollments?.length || 0}</p>
+              <p className="text-sm font-medium text-gray-500">Total Enrollments</p>
+              <p className="text-2xl font-semibold text-gray-800">{enrollments.length}</p>
             </div>
           </div>
         </div>
@@ -185,35 +198,53 @@ const Dashboard: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrolled Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {enrollments?.slice(0, 5).map((enrollment) => {
-                const program = programs?.find(p => p.programId === enrollment.programId);
-                return (
-                  <tr key={enrollment.programId}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{program?.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {new Date(enrollment.enrolledAt).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        enrollment.isCompleted
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {enrollment.isCompleted ? 'Completed' : 'In Progress'}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+              {enrollments.length > 0 ? (
+                [...enrollments]
+                  .sort((a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime())
+                  .slice(0, 5)
+                  .map((enrollment, idx) => {
+                    const program = programs.find(p => p.programId === enrollment.programId);
+                    const userName = enrollment.userId || 'N/A';
+                    return (
+                      <tr key={enrollment.id || enrollment.programId || idx}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{program?.name || 'Unknown Program'}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">{userName}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {enrollment.enrolledAt
+                              ? new Date(enrollment.enrolledAt).toLocaleDateString()
+                              : 'N/A'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            enrollment.status === 'completed'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {enrollment.status === 'completed' ? 'Completed' : 'In Progress'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+              ) : (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    No enrollments found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

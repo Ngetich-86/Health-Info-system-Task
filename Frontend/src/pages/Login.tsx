@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../features/users/usersAPI';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../features/users/userSlice';
+import { setUser } from '../features/auth/authSlice';
 import { LoginInput } from '../types/types';
 
 const Login = () => {
@@ -26,10 +26,11 @@ const Login = () => {
 
         try {
             const response = await login(formData).unwrap();
-            dispatch(loginSuccess({
-                token: response.token,
-                user: response.user
-            }));
+            // Store token and user data in localStorage
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response.user));
+            // Update auth state
+            dispatch(setUser(response.user));
             navigate('/dashboard');
         } catch (err) {
             console.error('Login failed:', err);

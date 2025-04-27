@@ -5,6 +5,7 @@ import storage from 'redux-persist/lib/storage';
 import userReducer from '../features/users/userSlice';
 import { usersAPI } from '../features/users/usersAPI';
 import { programAPI } from '../features/healthPrograms/programAPI';
+import { enrollmentApi } from '../features/enrollment/enrollmentAPI';
 
 const persistConfig = {
   key: 'root',
@@ -18,7 +19,9 @@ export const store = configureStore({
   reducer: {
     user: persistedReducer,
     [usersAPI.reducerPath]: usersAPI.reducer,
-    [programAPI.reducerPath]: programAPI.reducer
+    [programAPI.reducerPath]: programAPI.reducer,
+    [enrollmentApi.reducerPath]: enrollmentApi.reducer
+    
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

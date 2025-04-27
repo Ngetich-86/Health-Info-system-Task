@@ -7,7 +7,9 @@ import { UpdateProfileInput, CompleteUser } from '../types/types';
 
 const Profile = () => {
     const navigate = useNavigate();
-    const { user: currentUser, token } = useSelector((state: RootState) => state.user);
+    const userState = useSelector((state: RootState) => state.user) || {};
+    const currentUser = userState.user;
+    const token = userState.token;
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<UpdateProfileInput>({
         firstName: '',

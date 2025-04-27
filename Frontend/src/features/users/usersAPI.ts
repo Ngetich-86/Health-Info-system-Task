@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utils/ApiDomain";
 import { User, CompleteUser, AuthResponse, LoginInput, RegisterInput, UpdateProfileInput, ApiResponse } from "../../types/types";
-import { RootState } from "../../app/store";
+import { RootState } from "../../store";
 
 // API Slice
 export const usersAPI = createApi({
@@ -9,7 +9,7 @@ export const usersAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: ApiDomain,
         prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as RootState).user.token;
+            const token = (getState() as RootState).auth.user?.token;
             if (token) {
                 headers.set('Authorization', `Bearer ${token}`);
             }
@@ -22,7 +22,7 @@ export const usersAPI = createApi({
         // Auth endpoints
         register: builder.mutation<ApiResponse<{ userId: string }>, Omit<RegisterInput, 'confirmPassword'>>({
             query: (userData) => ({
-                url: 'users/register',
+                url: 'register',
                 method: 'POST',
                 body: userData,
             }),

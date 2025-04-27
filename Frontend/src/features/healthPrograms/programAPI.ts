@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utils/ApiDomain";
-import { RootState } from "../../app/store";
+import { RootState } from "../../store";
 
 // Types
 export interface HealthProgram {
@@ -46,7 +46,7 @@ export const programAPI = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: ApiDomain,
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).user.token;
+      const token = (getState() as RootState).auth.user?.token;
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }

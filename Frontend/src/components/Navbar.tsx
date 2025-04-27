@@ -10,23 +10,25 @@ import {
   FaUser
 } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../app/store';
-import { logOut } from '../features/users/userSlice';
-import { UserState } from '../types/types';
+import { RootState } from '../store';
+import { logout } from '../features/auth/authSlice';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, token } = useSelector((state: RootState) => state.user as UserState);
-  const isAuthenticated = !!token;
+  const { user, isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
 
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    dispatch(logOut());
+    dispatch(logout());
     navigate('/login');
   };
+
+  if (loading) {
+    return null; // or a loading spinner
+  }
 
   return (
     <nav className="bg-teal-700 text-white shadow-lg">
@@ -82,14 +84,6 @@ const Navbar = () => {
                   <FaClipboardList className="h-4 w-4 mr-1" />
                   Programs
                 </Link>
-                <Link
-                  to="/my-programs"
-                  className={`text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium ${
-                    location.pathname === '/my-programs' ? 'bg-gray-900 text-white' : ''
-                  }`}
-                >
-                  My Programs
-                </Link>
               </div>
             )}
           </div>
@@ -106,11 +100,27 @@ const Navbar = () => {
                 
                 {/* User dropdown */}
                 <div className="ml-4 relative flex-shrink-0">
-                  <div className="group relative">
-                    <button className="flex items-center text-sm rounded-full focus:outline-none">
+                  <div className="relative">
+                    <button 
+                      className="flex items-center text-sm rounded-full focus:outline-none"
+                      onMouseEnter={(e) => {
+                        // Show dropdown on hover
+                        const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (dropdown) dropdown.style.display = 'block';
+                      }}
+                      onMouseLeave={(e) => {
+                        // Hide dropdown after a small delay to allow cursor to move to dropdown
+                        const dropdown = e.currentTarget.nextElementSibling as HTMLElement;
+                        setTimeout(() => {
+                          if (dropdown && !dropdown.matches(':hover')) {
+                            dropdown.style.display = 'none';
+                          }
+                        }, 100);
+                      }}
+                    >
                       <img
                         className="h-8 w-8 rounded-full"
-                        src={user?.imageUrl || "/user-avatar.png"}
+                        src={user?.imageUrl || "https://cdn.pixabay.com/photo/2018/04/18/18/56/user-3331256_1280.png"}
                         alt="User profile"
                       />
                       <span className="ml-2 hidden md:inline text-white font-medium">
@@ -122,7 +132,17 @@ const Navbar = () => {
                     </button>
                     
                     {/* Dropdown menu */}
-                    <div className="hidden group-hover:block absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50">
+                    <div 
+                      className="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 py-1 z-50"
+                      onMouseEnter={(e) => {
+                        // Keep dropdown visible when hovering over it
+                        e.currentTarget.style.display = 'block';
+                      }}
+                      onMouseLeave={(e) => {
+                        // Hide dropdown when leaving
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    >
                       <Link
                         to="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-800"
@@ -232,3 +252,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

@@ -111,6 +111,7 @@ export interface RegisterInput {
   lastName: string;
   role: 'patient' | 'doctor' | 'admin';
   confirmPassword?: string;
+  gender: string;
 }
 
 export interface UpdateProfileInput {
