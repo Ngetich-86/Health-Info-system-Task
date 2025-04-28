@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../../utils/ApiDomain";
-import { User, CompleteUser, AuthResponse, LoginInput, RegisterInput, UpdateProfileInput, ApiResponse } from "../../types/types";
+import { CompleteUser, AuthResponse, LoginInput, RegisterInput, UpdateProfileInput, ApiResponse } from "../../types/types";
 import { RootState } from "../../store";
 
 // API Slice

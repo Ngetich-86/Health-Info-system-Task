@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useGetAllUsersQuery, useSearchUsersQuery } from '../features/users/usersAPI';
 import { useGetAllEnrollmentsQuery, useCreateEnrollmentMutation } from '../features/enrollment/enrollmentAPI';
 import { useGetAllProgramsQuery } from '../features/programs/programsAPI';
-import { CompleteUser, UserRole, HealthProgram } from '../types/types';
-import { FaSearch, FaUserPlus, FaEye, FaEdit, FaTrash, FaClipboardList, FaGraduationCap } from 'react-icons/fa';
+import { CompleteUser, UserRole } from '../types/types';
+import { FaSearch, FaUserPlus, FaEye, FaEdit, FaClipboardList, FaGraduationCap } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

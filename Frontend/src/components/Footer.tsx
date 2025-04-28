@@ -1,4 +1,4 @@
-import { FaHospital, FaUserMd, FaFileMedical, FaPhone, FaEnvelope, FaMapMarkerAlt, FaLinkedin, FaTwitter, FaGithub } from 'react-icons/fa';
+import { FaHospital, FaPhone, FaEnvelope, FaMapMarkerAlt, FaLinkedin, FaTwitter, FaGithub } from 'react-icons/fa';
 
 export const Footer = () => {
   return (
