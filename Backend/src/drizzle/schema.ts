@@ -1,4 +1,5 @@
 import { pgTable, serial, varchar, text, date, boolean, timestamp, index, primaryKey, pgEnum, integer } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 // 1. Define User Roles as a PostgreSQL ENUM
 export const userRoleEnum = pgEnum('user_role', ['client', 'doctor', 'admin']);
@@ -68,8 +69,8 @@ export const Enrollment = pgTable('enrollment', {
     .references(() => HealthProgram.programId, { onDelete: 'cascade' }),
   enrolledAt: timestamp('enrolled_at').defaultNow().notNull(),
   completedAt: timestamp('completed_at'),
-  status: varchar('status', { length: 20 }).notNull().default('active'), // active, completed, paused, cancelled
-  progress: integer('progress').default(0), // 0-100 percentage
+  status: varchar('status', { length: 20 }).notNull().default('active'),
+  progress: integer('progress').default(0),
   notes: text('notes'),
   lastAccessedAt: timestamp('last_accessed_at').defaultNow(),
 }, (table) => ({
@@ -77,11 +78,35 @@ export const Enrollment = pgTable('enrollment', {
   statusIdx: index('enrollment_status_idx').on(table.status),
 }));
 
+// Define relationships
+export const enrollmentRelations = relations(Enrollment, ({ one }) => ({
+  user: one(User, {
+    fields: [Enrollment.userId],
+    references: [User.userId],
+  }),
+  program: one(HealthProgram, {
+    fields: [Enrollment.programId],
+    references: [HealthProgram.programId],
+  }),
+}));
+
+export const userRelations = relations(User, ({ many }) => ({
+  enrollments: many(Enrollment),
+}));
+
+export const programRelations = relations(HealthProgram, ({ many }) => ({
+  enrollments: many(Enrollment),
+}));
+
+// Export the schema object with all tables and enums
 export const schema = {
   User,
   Client,
   Doctor,
   HealthProgram,
   Enrollment,
-  userRoleEnum
+  userRoleEnum,
+  enrollmentRelations,
+  userRelations,
+  programRelations
 };

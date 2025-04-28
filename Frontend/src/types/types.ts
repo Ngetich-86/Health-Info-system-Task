@@ -56,12 +56,22 @@ export interface HealthProgram {
 
 // Enrollment Interface
 export interface Enrollment {
-  id?: number; // Optional for auto-increment
-  userId: string;
-  programId: string;
-  enrolledAt: Date;
-  status: 'active' | 'completed' | 'dropped';
-  notes?: string;
+    id: number;
+    userId: string;
+    programId: string;
+    enrolledAt: string;
+    completedAt: string | null;
+    status: 'active' | 'completed' | 'inactive';
+    progress: number;
+    notes: string | null;
+    lastAccessedAt: string;
+    user?: {
+        email: string;
+        role: string;
+    };
+    program?: {
+        name: string;
+    };
 }
 
 // Combined User Type for API Responses

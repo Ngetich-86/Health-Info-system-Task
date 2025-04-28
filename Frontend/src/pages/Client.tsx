@@ -5,6 +5,8 @@ import { useGetAllEnrollmentsQuery, useCreateEnrollmentMutation } from '../featu
 import { useGetAllProgramsQuery } from '../features/programs/programsAPI';
 import { CompleteUser, UserRole, HealthProgram } from '../types/types';
 import { FaSearch, FaUserPlus, FaEye, FaEdit, FaTrash, FaClipboardList, FaGraduationCap } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Client = () => {
     const navigate = useNavigate();
@@ -17,9 +19,14 @@ const Client = () => {
     const [enrollmentNotes, setEnrollmentNotes] = useState('');
 
     const { data: clients, isLoading: isLoadingClients } = useGetAllUsersQuery();
-    const { data: enrollments } = useGetAllEnrollmentsQuery();
+    const { data: enrollments = [], isLoading: isLoadingEnrollments, refetch: refetchEnrollments } = useGetAllEnrollmentsQuery();
     const [createEnrollment] = useCreateEnrollmentMutation();
-    const { data: programs, isLoading: isLoadingPrograms, error: programsError } = useGetAllProgramsQuery();
+    const { data: programs = [], isLoading: isLoadingPrograms, error: programsError } = useGetAllProgramsQuery();
+
+    // Add debug logs
+    console.log('Enrollments:', enrollments);
+    console.log('Selected Client:', selectedClient);
+    console.log('Programs:', programs);
 
     // Filter clients in the frontend
     const displayedClients = (clients || []).filter(client => {
@@ -72,15 +79,44 @@ const Client = () => {
                         notes: enrollmentNotes
                     }).unwrap();
                 }
+                // Refetch enrollments after successful enrollment
+                await refetchEnrollments();
+                
+                toast.success('Client enrolled successfully!', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
                 handleCloseModal();
             } catch (error) {
                 console.error('Failed to create enrollment:', error);
+                toast.error('Failed to enroll client. Please try again.', {
+                    position: "top-right",
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
             }
+        } else {
+            toast.warning('Please select at least one program to enroll.', {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+            <ToastContainer />
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
@@ -287,25 +323,40 @@ const Client = () => {
                             <div className="mt-8">
                                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Enrolled Programs</h4>
                                 <div className="bg-gray-50 rounded-lg p-4">
-                                    {enrollments && enrollments.filter(e => e.userId === selectedClient.userId).length > 0 ? (
-                                        <ul className="divide-y divide-gray-200">
-                                            {enrollments.filter(e => e.userId === selectedClient.userId).map((enrollment, idx) => {
-                                                const program = programs?.find(p => p.programId === enrollment.programId);
-                                                return (
-                                                    <li key={enrollment.id || idx} className="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                                        <div>
-                                                            <span className="font-medium text-gray-900">{program?.name || 'Unknown Program'}</span>
-                                                            <span className="ml-2 text-xs px-2 py-1 rounded-full font-semibold 'bg-gray-100 text-gray-700'">
-                                                                {enrollment.status.charAt(0).toUpperCase() + enrollment.status.slice(1)}
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 mt-1 sm:mt-0">
-                                                            Enrolled: {enrollment.enrolledAt ? new Date(enrollment.enrolledAt).toLocaleDateString() : 'N/A'}
-                                                        </div>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
+                                    {isLoadingEnrollments ? (
+                                        <div className="text-gray-500 text-sm">Loading enrollments...</div>
+                                    ) : Array.isArray(enrollments) && selectedClient ? (
+                                        (() => {
+                                            const clientEnrollments = enrollments.filter(e => e.userId === selectedClient.userId);
+                                            console.log('Client Enrollments:', clientEnrollments);
+                                            
+                                            return clientEnrollments.length > 0 ? (
+                                                <ul className="divide-y divide-gray-200">
+                                                    {clientEnrollments.map((enrollment, idx) => {
+                                                        const program = Array.isArray(programs) 
+                                                            ? programs.find(p => p.programId === enrollment.programId) 
+                                                            : null;
+                                                        console.log('Found Program:', program);
+                                                        
+                                                        return (
+                                                            <li key={enrollment.id || idx} className="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                                                <div>
+                                                                    <span className="font-medium text-gray-900">{program?.name || 'Unknown Program'}</span>
+                                                                    <span className="ml-2 text-xs px-2 py-1 rounded-full font-semibold 'bg-gray-100 text-gray-700'">
+                                                                        {enrollment.status.charAt(0).toUpperCase() + enrollment.status.slice(1)}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-xs text-gray-500 mt-1 sm:mt-0">
+                                                                    Enrolled: {enrollment.enrolledAt ? new Date(enrollment.enrolledAt).toLocaleDateString() : 'N/A'}
+                                                                </div>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            ) : (
+                                                <div className="text-gray-500 text-sm">No enrolled programs.</div>
+                                            );
+                                        })()
                                     ) : (
                                         <div className="text-gray-500 text-sm">No enrolled programs.</div>
                                     )}

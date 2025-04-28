@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { 
@@ -37,42 +37,53 @@ const Dashboard: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const { data: programs = [], isLoading: programsLoading } = useGetAllProgramsQuery();
   const { data: enrollments = [], isLoading: enrollmentsLoading, refetch: refetchEnrollments } = useGetAllEnrollmentsQuery();
-  console.log('Enrollments:', enrollments);
-console.log('Programs:', programs);
 
-  // Calculate program statistics
-  const programStats = programs.reduce((acc: Record<string, number>, program: HealthProgram) => {
+  // Add debug logs
+  console.log('Dashboard - Enrollments:', enrollments);
+  console.log('Dashboard - Programs:', programs);
+
+  // Calculate program statistics with proper type checking
+  const programStats = Array.isArray(programs) ? programs.reduce((acc: Record<string, number>, program: HealthProgram) => {
     const difficulty = program.difficulty || 'Unknown';
     acc[difficulty] = (acc[difficulty] || 0) + 1;
     return acc;
-  }, {});
+  }, {}) : {};
 
   const programData: ProgramStat[] = Object.entries(programStats).map(([name, value]) => ({
     name,
     value
   }));
 
-  // Calculate completion rate
-  const completionRate = enrollments.reduce((acc: { completed: number; total: number }, enrollment: Enrollment) => {
+  // Calculate completion rate with proper type checking
+  const completionRate = Array.isArray(enrollments) ? enrollments.reduce((acc: { completed: number; total: number }, enrollment: Enrollment) => {
     if (enrollment.status === 'completed') acc.completed++;
     acc.total++;
     return acc;
-  }, { completed: 0, total: 0 });
+  }, { completed: 0, total: 0 }) : { completed: 0, total: 0 };
 
   const completionPercentage = completionRate.total > 0 
     ? Math.round((completionRate.completed / completionRate.total) * 100) 
     : 0;
 
-  // Calculate enrollment data for chart
-  const enrollmentData: EnrollmentData[] = programs.map((program: HealthProgram) => {
-    const enrollmentCount = enrollments.filter((e: Enrollment) => e.programId === program.programId).length;
-    // console.log('Enrollment Count:', enrollmentCount);
+  // Calculate enrollment data for chart with proper type checking
+  const enrollmentData: EnrollmentData[] = Array.isArray(programs) ? programs.map((program: HealthProgram) => {
+    const enrollmentCount = Array.isArray(enrollments) 
+      ? enrollments.filter((e: Enrollment) => e.programId === program.programId).length 
+      : 0;
     return {
       name: program.name,
       enrollments: enrollmentCount
     };
-  });
-  // console.log("Enrollment Data:", enrollmentData);
+  }) : [];
+
+  // Refetch enrollments periodically to keep data fresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchEnrollments();
+    }, 30000); // Refetch every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [refetchEnrollments]);
 
   if (programsLoading || enrollmentsLoading) {
     return (
@@ -95,7 +106,7 @@ console.log('Programs:', programs);
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Programs</p>
-              <p className="text-2xl font-semibold text-gray-800">{programs.length}</p>
+              <p className="text-2xl font-semibold text-gray-800">{Array.isArray(programs) ? programs.length : 0}</p>
             </div>
           </div>
         </div>
@@ -107,7 +118,7 @@ console.log('Programs:', programs);
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Enrollments</p>
-              <p className="text-2xl font-semibold text-gray-800">{enrollments.length}</p>
+              <p className="text-2xl font-semibold text-gray-800">{Array.isArray(enrollments) ? enrollments.length : 0}</p>
             </div>
           </div>
         </div>
@@ -204,12 +215,14 @@ console.log('Programs:', programs);
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {enrollments.length > 0 ? (
+              {Array.isArray(enrollments) && enrollments.length > 0 ? (
                 [...enrollments]
                   .sort((a, b) => new Date(b.enrolledAt).getTime() - new Date(a.enrolledAt).getTime())
                   .slice(0, 5)
                   .map((enrollment, idx) => {
-                    const program = programs.find(p => p.programId === enrollment.programId);
+                    const program = Array.isArray(programs) 
+                      ? programs.find(p => p.programId === enrollment.programId)
+                      : null;
                     const userName = enrollment.userId || 'N/A';
                     return (
                       <tr key={enrollment.id || enrollment.programId || idx}>

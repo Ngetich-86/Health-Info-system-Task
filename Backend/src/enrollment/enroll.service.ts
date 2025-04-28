@@ -1,5 +1,5 @@
 import db from "../drizzle/db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, sql } from "drizzle-orm";
 import { Enrollment, User, HealthProgram } from "../drizzle/schema";
 
 // Create new enrollment
@@ -47,25 +47,47 @@ export const createEnrollmentService = async (enrollmentData: {
 // Get all enrollments
 export const getAllEnrollmentsService = async () => {
   try {
-    const enrollments = await db.query.Enrollment.findMany({
-      with: {
-        user: {
-          columns: {
-            userId: true,
-            email: true,
-            role: true
-          }
-        },
-        program: {
-          columns: {
-            programId: true,
-            name: true
-          }
-        }
+    const enrollments = await db.execute(sql`
+      SELECT 
+        e.id,
+        e.user_id as "userId",
+        e.program_id as "programId",
+        e.enrolled_at as "enrolledAt",
+        e.completed_at as "completedAt",
+        e.status,
+        e.progress,
+        e.notes,
+        e.last_accessed_at as "lastAccessedAt",
+        u.email,
+        u.role,
+        p.name as "programName"
+      FROM enrollment e
+      LEFT JOIN "user" u ON e.user_id = u.user_id
+      LEFT JOIN health_program p ON e.program_id = p.program_id
+    `);
+    
+    // Map the response to match the frontend's expected format
+    const mappedEnrollments = enrollments.rows.map(row => ({
+      id: row.id,
+      userId: row.userId,
+      programId: row.programId,
+      enrolledAt: row.enrolledAt,
+      completedAt: row.completedAt,
+      status: row.status,
+      progress: row.progress,
+      notes: row.notes,
+      lastAccessedAt: row.lastAccessedAt,
+      user: {
+        email: row.email,
+        role: row.role
+      },
+      program: {
+        name: row.programName
       }
-    });
-    console.log("Enrollments Retrieved:", enrollments);
-    return enrollments;
+    }));
+
+    console.log("Mapped Enrollments:", mappedEnrollments);
+    return mappedEnrollments;
   } catch (err) {
     console.error("Error in getAllEnrollmentsService:", err);
     throw err;
@@ -99,14 +121,6 @@ export const getEnrollmentsByProgramIdService = async (programId: string) => {
         columns: {
           userId: true,
           email: true
-        },
-        with: {
-          client: {
-            columns: {
-              firstName: true,
-              lastName: true
-            }
-          }
         }
       }
     }

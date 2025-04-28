@@ -6,6 +6,7 @@ Built with **React**, **TypeScript**, **Node.js**, **Hono.js**, **Drizzle ORM**,
 ---
 ## 📸 Demo
 
+[![Watch Demo](https://cdn.loom.com/sessions/thumbnails/6a9b81cb8b014ed8bb117f3efa331e4f-with-play.gif)](https://www.loom.com/share/6a9b81cb8b014ed8bb117f3efa331e4f?sid=f1131312-1ee5-4c7c-8e1d-aa2491977648)
 
 ## ✨ Features
 
@@ -59,7 +60,7 @@ I used **TailwindCSS** to create a simple, mobile-friendly, and clean user inter
 I made sure to write clear comments and keep the codebase clean to make it easy for others to understand and contribute.
 
 ### The Process
-Here’s my step-by-step approach:
+Here's my step-by-step approach:
 1. **Backend Development:** I began by designing my schemas and setting up the database. I created models for users, health programs, and their enrollments.
 2. **Controllers:** I wrote controllers for each model and designed API endpoints to handle client requests (e.g., client registration, health program enrollment).
 3. **Testing:** I used **Postman** to test all the API endpoints and ensure they were working correctly before moving to the frontend.
@@ -97,9 +98,31 @@ git clone https://github.com/Ngetich-86/Health-Info-system-Task
 
 ### Configure Environment Variables
 
-## Start the Backend Server
+Create a `.env` file in the Backend directory with the following variables:
+```bash
+DATABASE_URL="your_database_url"
+JWT_SECRET="your_jwt_secret"
+```
 
-## Start the Frontend App
+### Start the Backend Server
+
+```bash
+cd Backend
+npm install
+npm run dev
+```
+
+### Start the Frontend App
+
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+The application will be available at:
+- Frontend: http://localhost:5173
+- Backend: http://localhost:3000
 
 
 
