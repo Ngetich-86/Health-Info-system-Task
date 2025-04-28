@@ -34,7 +34,6 @@ interface EnrollmentData {
 }
 
 const Dashboard: React.FC = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
   const { data: programs = [], isLoading: programsLoading } = useGetAllProgramsQuery();
   const { data: enrollments = [], isLoading: enrollmentsLoading, refetch: refetchEnrollments } = useGetAllEnrollmentsQuery();
 
@@ -166,7 +165,7 @@ const Dashboard: React.FC = () => {
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
-                  {programData.map((entry, index) => (
+                  {programData.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

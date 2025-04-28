@@ -45,7 +45,7 @@ export const usersAPI = createApi({
         // User Profile endpoints
         getUserProfile: builder.query<CompleteUser, string>({
             query: (userId) => `users/${userId}`,
-            providesTags: (result, error, userId) => [{ type: 'Users', id: userId }],
+            providesTags: (_result, _error, userId) => [{ type: 'Users', id: userId }],
         }),
         updateProfile: builder.mutation<ApiResponse<void>, { userId: string; data: UpdateProfileInput }>({
             query: ({ userId, data }) => ({
@@ -53,7 +53,7 @@ export const usersAPI = createApi({
                 method: 'PUT',
                 body: data,
             }),
-            invalidatesTags: (result, error, { userId }) => [{ type: 'Users', id: userId }],
+            invalidatesTags: (_result, _error, { userId }) => [{ type: 'Users', id: userId }],
         }),
         changePassword: builder.mutation<ApiResponse<void>, { userId: string; currentPassword: string; newPassword: string }>({
             query: ({ userId, currentPassword, newPassword }) => ({
@@ -83,7 +83,7 @@ export const usersAPI = createApi({
         }),
         getUserProfileV2: builder.query<CompleteUser, string>({
             query: (userId) => `v2/users/${userId}`,
-            providesTags: (result, error, userId) => [{ type: 'Users', id: userId }],
+            providesTags: (_result, _error, userId) => [{ type: 'Users', id: userId }],
         }),
         updateProfileV2: builder.mutation<ApiResponse<void>, { userId: string; data: UpdateProfileInput }>({
             query: ({ userId, data }) => ({
@@ -91,7 +91,7 @@ export const usersAPI = createApi({
                 method: 'PUT',
                 body: data,
             }),
-            invalidatesTags: (result, error, { userId }) => [{ type: 'Users', id: userId }],
+            invalidatesTags: (_result, _error, { userId }) => [{ type: 'Users', id: userId }],
         }),
     }),
 });

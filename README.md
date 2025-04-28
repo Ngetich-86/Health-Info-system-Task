@@ -4,11 +4,10 @@ A basic Health Information System that allows doctors to manage clients and enro
 Built with **React**, **TypeScript**, **Node.js**, **Hono.js**, **Drizzle ORM**, **PostgreSQL**, and **TailwindCSS**.
 
 ---
-## 📸 Demo
 
 ## 📸 Demo
 
-[![Watch Demo](https://cdn.loom.com/sessions/thumbnails/6a9b81cb8b014ed8bb117f3efa331e4f-with-play.png)](https://www.loom.com/share/6a9b81cb8b014ed8bb117f3efa331e4f?sid=f1131312-1ee5-4c7c-8e1d-aa2491977648)
+[![Watch Demo](https://imagekit.io/tools/asset-public-link?detail=%7B%22name%22%3A%22health-info-system.png%22%2C%22type%22%3A%22image%2Fpng%22%2C%22signedurl_expire%22%3A%222028-04-27T15%3A39%3A58.712Z%22%2C%22signedUrl%22%3A%22https%3A%2F%2Fmedia-hosting.imagekit.io%2F6d50325f4a314395%2Fhealth-info-system.png%3FExpires%3D1840462799%26Key-Pair-Id%3DK2ZIVPTIP2VGHC%26Signature%3DV8u9xxmM~8TnCfc8oPGJzbVIPqWR90ZTyn49viXaAU861we4JBG-QBBsHbVbF1oAeb-QC1ZRbIw4a95Y3R1moqoOCrzrh520g4DrTvc0ktLefLkjCz0Qev8EB6q61buEhM4cGkMZPzth9XNuWqwn5L7JUTlrq-FT3Zqb8leCI3t8cROsKZTQBrws2gG8OqzAe6oC2CCNVGwXAM1EDhm9bjZabQUEVzEkd0qNXopYg4iSVjq~wKTbAqkjhYcbZrYon0Ux5vrsN8HCar8vbHuv4LjMtU90bSyFX7qrjuoye3EVJPiIIZIUplTKnXxvx6Ei3ZXqD67SBBSD7ICx~9Tpfg__%22%7D)](https://www.loom.com/share/6a9b81cb8b014ed8bb117f3efa331e4f?sid=f1131312-1ee5-4c7c-8e1d-aa2491977648)
 
 
 ## ✨ Features

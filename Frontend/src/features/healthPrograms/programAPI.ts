@@ -77,7 +77,7 @@ export const programAPI = createApi({
     // Get single program
     getProgram: builder.query<HealthProgram, string>({
       query: (programId) => `program/${programId}`,
-      providesTags: (result, error, programId) => [{ type: 'Programs', id: programId }],
+      providesTags: (_result, _error, programId) => [{ type: 'Programs', id: programId }],
     }),
 
     // Create program
@@ -97,7 +97,7 @@ export const programAPI = createApi({
         method: 'PUT',
         body: data,
       }),
-      invalidatesTags: (result, error, { programId }) => [{ type: 'Programs', id: programId }],
+      invalidatesTags: (_result, _error, { programId }) => [{ type: 'Programs', id: programId }],
     }),
 
     // Delete program
@@ -115,13 +115,13 @@ export const programAPI = createApi({
         url: `program/${programId}/toggle`,
         method: 'PATCH',
       }),
-      invalidatesTags: (result, error, programId) => [{ type: 'Programs', id: programId }],
+      invalidatesTags: (_result, _error, programId) => [{ type: 'Programs', id: programId }],
     }),
 
     // Enroll in program
     enrollInProgram: builder.mutation<ProgramEnrollment, string>({
       query: (programId) => ({
-        url: `program/${programId}/enroll`,
+        url: `enrollment/${programId}`,
         method: 'POST',
       }),
       invalidatesTags: ['Enrollments'],
@@ -129,22 +129,13 @@ export const programAPI = createApi({
 
     // Get user enrollments
     getUserEnrollments: builder.query<ProgramEnrollment[], void>({
-      query: () => 'program/enrollments',
+      query: () => 'enrollment/user',
       providesTags: ['Enrollments'],
-    }),
-
-    // Complete program
-    completeProgram: builder.mutation<ProgramEnrollment, string>({
-      query: (programId) => ({
-        url: `program/${programId}/complete`,
-        method: 'POST',
-      }),
-      invalidatesTags: ['Enrollments'],
     }),
   }),
 });
 
-// Export hooks for usage in components
+// Export hooks
 export const {
   useGetAllProgramsQuery,
   useGetActiveProgramsQuery,
@@ -156,5 +147,4 @@ export const {
   useToggleProgramStatusMutation,
   useEnrollInProgramMutation,
   useGetUserEnrollmentsQuery,
-  useCompleteProgramMutation,
 } = programAPI;

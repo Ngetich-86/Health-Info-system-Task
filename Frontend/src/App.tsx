@@ -14,7 +14,7 @@ import NewClient from './pages/Register';
 // import ClientPrograms from './pages/ClientPrograms';
 import Home from './pages/Home';
 import ProgramManagement from './pages/Program';
-import MyPrograms from './pages/MyPrograms';
+// import MyPrograms from './pages/MyPrograms';
 import Dashboard from './pages/Dashboard';
 import { Footer } from './components/Footer';
 
@@ -94,14 +94,14 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                            <Route
+                            {/* <Route
                                 path="/my-programs"
                                 element={
                                     <ProtectedRoute>
                                         <MyPrograms />
                                     </ProtectedRoute>
                                 }
-                            />
+                            /> */}
                         </Routes>
                     </main>
                     <Footer />

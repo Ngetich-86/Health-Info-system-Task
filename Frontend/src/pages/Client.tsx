@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetAllUsersQuery, useSearchUsersQuery } from '../features/users/usersAPI';
+import { useGetAllUsersQuery } from '../features/users/usersAPI';
 import { useGetAllEnrollmentsQuery, useCreateEnrollmentMutation } from '../features/enrollment/enrollmentAPI';
 import { useGetAllProgramsQuery } from '../features/programs/programsAPI';
 import { CompleteUser, UserRole } from '../types/types';
