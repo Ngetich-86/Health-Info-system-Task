@@ -6,7 +6,7 @@ Built with **React**, **TypeScript**, **Node.js**, **Hono.js**, **Drizzle ORM**,
 ---
 ## 📸 Demo
 
-[![Watch Demo](https://cdn.loom.com/sessions/thumbnails/6a9b81cb8b014ed8bb117f3efa331e4f-with-play.gif)](https://www.loom.com/share/6a9b81cb8b014ed8bb117f3efa331e4f?sid=f1131312-1ee5-4c7c-8e1d-aa2491977648)
+Watch the demo video here: [Health Information System Demo](https://www.loom.com/share/6a9b81cb8b014ed8bb117f3efa331e4f?sid=f1131312-1ee5-4c7c-8e1d-aa2491977648)
 
 ## ✨ Features
 
